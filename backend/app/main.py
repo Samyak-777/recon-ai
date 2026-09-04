@@ -37,6 +37,30 @@ app.include_router(recon.router)
 app.include_router(webhooks.router)
 
 
+@app.get("/")
+async def root():
+    return {
+        "project": "ReconAI",
+        "status": "OPERATIONAL",
+        "tagline": "Autonomous Settlement Reconciliation & Financial Intelligence",
+        "track": "Razorpay AI Buildathon 2026 — Track 04: AI Finance Controller",
+        "docs": "/docs",
+        "health": "/health",
+        "version": settings.VERSION,
+        "endpoints": {
+            "reconciliation": "/api/recon/results",
+            "seed_batch": "/api/recon/seed",
+            "run_pipeline": "/api/recon/run",
+            "exceptions": "/api/recon/exceptions",
+            "settlement_qa": "/api/recon/qa",
+            "cash_forecast": "/api/recon/forecast",
+            "tax_itc_dashboard": "/api/recon/tax-dashboard",
+            "webhooks_listener": "/api/recon/webhooks",
+            "webhooks_feed": "/api/recon/webhooks/feed"
+        }
+    }
+
+
 @app.get("/health")
 async def health():
     return {
