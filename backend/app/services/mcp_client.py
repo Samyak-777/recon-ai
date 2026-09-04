@@ -149,4 +149,3 @@ class RazorpayReconMCPClient:
         }
 
 recon_mcp = RazorpayReconMCPClient()
-ledgeriq_mcp = recon_mcp

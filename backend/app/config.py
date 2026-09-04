@@ -22,8 +22,8 @@ class Settings(BaseModel):
     MONGO_DB: str = "recon_ai_db"
 
     # Razorpay
-    RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "rzp_test_TWtvyCy1XTG7Aj")
-    RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "365Vu5xQqH9R3Q3rqfl7b4zn")
+    RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "")
+    RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "")
 
     # MCP Server
     MCP_BINARY: str = str(MCP_BINARY_PATH)

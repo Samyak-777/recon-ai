@@ -17,16 +17,8 @@ def generate_forecast(recon_result: Dict, days_ahead: int = 7) -> Dict:
     if not waterfalls:
         return {"summary": "No data available for forecasting.", "predictions": []}
 
-    # Group net payouts by date
-    daily_totals = {}
-    for w in waterfalls:
-        try:
-            # Use the payment date
-            pay_date = datetime.fromisoformat(w.get("payment_id", "")[:10]) if False else None
-        except (ValueError, TypeError):
-            pay_date = None
-
-    # Since we're working with synthetic data, compute aggregate stats
+    # Note: In production, daily_totals would be computed from actual settlement dates.
+    # With synthetic data, we use aggregate stats below instead.
     total_net = recon_result.get("financials", {}).get("total_net_payout", 0)
     total_records = recon_result.get("summary", {}).get("total_records", 1)
     total_gross = recon_result.get("financials", {}).get("total_gross", 0)
