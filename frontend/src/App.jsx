@@ -55,37 +55,28 @@ export default function App() {
     const size = sizeToRun || batchSize || 150;
     setIsReconciling(true);
     setShowBatchModal(true);
-    setBatchProgress(20);
+    setBatchProgress(10);
 
     try {
-      // Step 1: Ingest synthetic batch dataset
+      setBatchProgress(25);
       await fetch(`/api/recon/seed?num_transactions=${size}`, { method: 'POST' });
-      setBatchProgress(40);
-      await new Promise((r) => setTimeout(r, 250));
-
-      // Step 2 & 3: Run 4-stage reconciliation engine
-      setBatchProgress(60);
+      
+      setBatchProgress(65);
       const res = await fetch('/api/recon/run', { method: 'POST' });
       const data = await res.json();
-      setBatchProgress(80);
-      setReconData(data);
-      await new Promise((r) => setTimeout(r, 250));
+      setBatchProgress(90);
 
-      // Step 4: Fetch exceptions & finalize
-      try {
-        const excRes = await fetch('/api/recon/exceptions');
-        if (excRes.ok) {
-          const excData = await excRes.json();
-          setExceptionsData(excData);
-        }
-      } catch (e) {
-        console.warn('Exceptions fetch warning:', e);
+      setReconData(data);
+
+      const excRes = await fetch('/api/recon/exceptions');
+      if (excRes.ok) {
+        const excData = await excRes.json();
+        setExceptionsData(excData);
       }
 
       setBatchProgress(100);
     } catch (err) {
       console.error('Batch run error:', err);
-      setBatchProgress(100);
     } finally {
       setIsReconciling(false);
     }

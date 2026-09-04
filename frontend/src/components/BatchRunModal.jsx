@@ -34,13 +34,14 @@ export default function BatchRunModal({ isOpen, onClose, progress, batchSize = 1
             </div>
           </div>
           
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-            title="Close modal"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {progress >= 100 && (
+            <button 
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Progress Bar */}
