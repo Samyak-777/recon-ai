@@ -3,7 +3,7 @@
 > **Razorpay AI Buildathon 2026 Submission**  
 > **Track 04**: AI Finance Controller 
 > **Repository**: `Samyak-777/recon-ai`  
-> **Architecture**: Deterministic 4-Stage Reconciliation Engine + Autonomous Settlement RAG + Razorpay MCP Tools
+> **Architecture**: Deterministic 4-Stage Reconciliation Engine + Autonomous Settlement RAG + Razorpay MCP Tools  
 > **Live At**: https://recon-chi-peach.vercel.app/
 ---
 
