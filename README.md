@@ -120,7 +120,7 @@ Tested against **150 synthetic Razorpay transactions** across 6 settlement batch
 git clone https://github.com/Samyak-777/recon-ai.git
 cd recon-ai
 
-# Launch both Backend (Port 8001) and Frontend (Port 5174)
+# Launch both Backend (Port 8005) and Frontend (Port 5174)
 python run_recon_servers.py
 ```
 
