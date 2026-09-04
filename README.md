@@ -27,23 +27,25 @@
 
 ## 📖 Table of Contents
 
-- [The Problem](#-the-problem)
-- [How ReconAI Solves It](#-how-reconai-solves-it)
-- [System Architecture](#-system-architecture)
-- [Core Features](#-core-features)
-- [Benchmark Results](#-benchmark-results)
-- [Tech Stack](#-tech-stack)
-- [Quickstart](#-quickstart)
-- [Environment Variables](#-environment-variables)
-- [API Reference](#-api-reference)
-- [Project Structure](#-project-structure)
-- [Design Decisions](#-design-decisions)
-- [Failure Recovery](#-failure-recovery--what-broke-at-2-am)
-- [Deployment](#-deployment)
-- [Future Roadmap](#-future-roadmap)
-- [Glossary](#-glossary)
-- [Author](#-author)
-- [License](#-license)
+- [The Problem](#the-problem)
+- [How ReconAI Solves It](#how-reconai-solves-it)
+- [System Architecture](#system-architecture)
+- [Core Features](#core-features)
+- [Benchmark Results](#benchmark-results)
+- [Tech Stack](#tech-stack)
+- [Quickstart](#quickstart)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [Project Structure](#project-structure)
+- [Design Decisions & AI Judgment](#design-decisions)
+  - [AI Judgment: Deterministic Core vs. AI Edges](#ai-judgment-deterministic-core-vs-ai-edges)
+- [Failure Recovery](#failure-recovery-what-broke-at-2-am)
+- [Deployment](#deployment)
+- [Future Roadmap](#future-roadmap)
+- [Glossary](#glossary)
+- [Demo Video Structure](#demo-video-structure)
+- [Author](#author)
+- [License](#license)
 
 ---
 
@@ -354,9 +356,50 @@ recon-ai/
 | **Fuzzy Matching** | Weighted heuristic scoring | Embedding similarity | Amount proximity (0.5), date proximity (0.3), and settlement batch (0.2) provide explainable, auditable match scores. |
 | **Webhook Security** | HMAC SHA-256 + `compare_digest` | Token-based auth | Razorpay's standard webhook verification pattern. Constant-time comparison prevents timing attacks. |
 
+### 🤖 AI Judgment: Deterministic Core vs. AI Edges
+
+> **Razorpay Evaluation Pillar**: *"Did you use AI where it adds value and deterministic logic where it's safer?"*
+
+A critical anti-pattern in fintech hackathons is delegating financial reconciliation, MDR calculation, or variance classification to an LLM. In production financial systems, this is an unacceptable liability. ReconAI enforces a strict **Two-Tier Architecture**:
+
+```
+[User Natural Language Query]
+       │
+       ▼ (Edge 1: Natural Language → Structured Intent)
+  [LLM Intent Parser] (Extracts: intent, date_range, threshold)
+       │
+       ▼
+┌─────────────────────────────────────────────────────────┐
+│        100% DETERMINISTIC PYTHON ENGINE                 │
+│  - Exact ID Hash-Join Matching (O(n))                   │
+│  - Gross-to-Net Multi-Tier Fee Waterfall Arithmetic     │
+│  - Rule-Gated Variance Decision Tree (5 categories)     │
+│  - Section 16 CGST Act ITC Claim Computation            │
+└─────────────────────────────────────────────────────────┘
+       │
+       ▼ (Edge 2: Structured Data → Human Narrative)
+  [LLM Narrative Generator] (CFO Briefing / Bank Escalation Letter)
+       │
+       ▼
+[Executive Explanation / Ready-to-Send Bank Dispute Ticket]
+```
+
+#### 1. Where LLMs Must NEVER Be Added (The Core)
+- **Exact Transaction Matching**: $O(1)$ hash joins are instantaneous, zero-cost, and mathematically infallible. An LLM adds latency, cost, and hallucinated identifiers.
+- **Gross-to-Net Waterfall**: Multi-tier fee arithmetic ($\text{Net} = \text{Gross} - \text{MDR} - \text{GST} - \text{Refunds}$) demands zero rounding drift. Financial accounting cannot tolerate probabilistic outputs.
+- **Variance Classification**: Distinguishing fee deductions, sub-rupee rounding, and cross-period refund adjustments follows strict banking rules, not ambiguous prompts.
+- **Cash Forecasting**: Statistical day-of-week seasonality is grounded in historical ledger transactions, not generative text prediction.
+
+#### 2. Where AI/LLMs Add Legitimate Value (At the Edges)
+AI is strictly deployed as an external **translation and narrative layer**, never touching financial math:
+- **Semantic Intent Parsing (`settlement_qa.py`)**: Translates complex, conversational merchant queries (*"Why did our net payout drop this Tuesday compared to last week?"*) into structured query parameters for deterministic Python aggregation handlers.
+- **CFO Executive Briefings**: Takes 100% deterministic reconciliation summaries and synthesizes high-level executive commentary highlighting claimable tax credits and cash flow trends.
+- **Automated Bank Escalation Drafts**: Formats disputed or unexplained anomalies into ready-to-send dispute tickets with exact UTRs, timestamps, and rupee amounts pre-filled.
+
 ---
 
-## 🔧 Failure Recovery - "What Broke at 2 AM"
+<a id="failure-recovery"></a>
+## 🔧 Failure Recovery — "What Broke at 2 AM"
 
 > *Judges evaluate engineering resilience: what failed during development and how we resolved it.*
 
@@ -455,7 +498,7 @@ recon-ai/
 
 ## 👤 Author
 
-**Samyak** — [github.com/Samyak-777](https://github.com/Samyak-777)
+**Samyak** : [github.com/Samyak-777](https://github.com/Samyak-777)
 
 Built as a solo submission for **Razorpay AI Buildathon 2026** - Track 04: AI Finance Controller.
 
