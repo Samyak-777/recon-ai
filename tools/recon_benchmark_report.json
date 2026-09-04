@@ -1,0 +1,458 @@
+{
+  "run_timestamp": "2026-09-03T21:18:53.465753",
+  "summary": {
+    "total_records": 150,
+    "exact_matches": 148,
+    "match_rate_percent": 98.67,
+    "duplicates_found": 0,
+    "missing_from_settlement": 2,
+    "unmatched_recon_entries": 0,
+    "fuzzy_auto_matched": 0,
+    "fuzzy_review_needed": 0,
+    "category_breakdown": {
+      "CROSS_PERIOD_REFUND": 6,
+      "ROUNDING": 8,
+      "MATCHED": 131,
+      "FEE_DEDUCTION": 3
+    }
+  },
+  "financials": {
+    "total_gross": 3652788.1,
+    "total_mdr_fees": 45217.23,
+    "total_gst_on_mdr": 8136.29,
+    "itc_eligible_gst": 8136.29,
+    "total_refunds_deducted": 82452.17,
+    "total_net_payout": 3516984.69,
+    "mdr_by_method": {
+      "upi": {
+        "count": 60,
+        "total_mdr": 0.0,
+        "total_gross": 1523424.6,
+        "total_gst": 0.0,
+        "effective_rate": 0.0
+      },
+      "card": {
+        "count": 44,
+        "total_mdr": 21151.67,
+        "total_gross": 1057879.89,
+        "total_gst": 3808.37,
+        "effective_rate": 1.9994
+      },
+      "intl_card": {
+        "count": 10,
+        "total_mdr": 9020.08,
+        "total_gross": 257716.17,
+        "total_gst": 1623.61,
+        "effective_rate": 3.5
+      },
+      "wallet": {
+        "count": 16,
+        "total_mdr": 7147.1,
+        "total_gross": 376163.51,
+        "total_gst": 1286.46,
+        "effective_rate": 1.9
+      },
+      "netbanking": {
+        "count": 18,
+        "total_mdr": 7898.38,
+        "total_gross": 437603.93,
+        "total_gst": 1417.85,
+        "effective_rate": 1.8049
+      }
+    }
+  },
+  "performance": {
+    "total_ms": 0.0,
+    "stage1_exact_match_ms": 0.0,
+    "stage2_waterfall_ms": 0.0,
+    "stage3_classification_ms": 0.0,
+    "stage4_fuzzy_match_ms": 0.0,
+    "throughput_records_per_sec": 0
+  },
+  "sample_waterfalls": [
+    {
+      "payment_id": "pay_99f770d601f1fe",
+      "order_id": "order_778c82e7cfc479",
+      "method": "upi",
+      "gross_amount": 1348.04,
+      "mdr_fee": 0.0,
+      "mdr_rate_expected": 0.0,
+      "mdr_rate_actual": 0.0,
+      "gst_on_mdr": 0.0,
+      "gst_rate": 0.18,
+      "itc_eligible_gst": 0.0,
+      "refund_deducted": 1103.33,
+      "net_payout": 244.71,
+      "expected_net": 1348.04,
+      "net_variance": -1103.33,
+      "waterfall_steps": [
+        {
+          "label": "Gross Amount",
+          "amount": 1348.04,
+          "type": "credit"
+        },
+        {
+          "label": "MDR Fee (upi)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "GST on MDR (18%)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "Refund Deducted",
+          "amount": -1103.33,
+          "type": "debit"
+        },
+        {
+          "label": "Net Payout",
+          "amount": 244.71,
+          "type": "net"
+        }
+      ]
+    },
+    {
+      "payment_id": "pay_94dad04040ecfd",
+      "order_id": "order_f0327839d8356d",
+      "method": "upi",
+      "gross_amount": 1685.96,
+      "mdr_fee": 0.0,
+      "mdr_rate_expected": 0.0,
+      "mdr_rate_actual": 0.0,
+      "gst_on_mdr": 0.0,
+      "gst_rate": 0.18,
+      "itc_eligible_gst": 0.0,
+      "refund_deducted": 0.6,
+      "net_payout": 1685.36,
+      "expected_net": 1685.96,
+      "net_variance": -0.6,
+      "waterfall_steps": [
+        {
+          "label": "Gross Amount",
+          "amount": 1685.96,
+          "type": "credit"
+        },
+        {
+          "label": "MDR Fee (upi)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "GST on MDR (18%)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "Refund Deducted",
+          "amount": -0.6,
+          "type": "debit"
+        },
+        {
+          "label": "Net Payout",
+          "amount": 1685.36,
+          "type": "net"
+        }
+      ]
+    },
+    {
+      "payment_id": "pay_30476b91b080a1",
+      "order_id": "order_afb2169a6a4a83",
+      "method": "upi",
+      "gross_amount": 27292.58,
+      "mdr_fee": 0.0,
+      "mdr_rate_expected": 0.0,
+      "mdr_rate_actual": 0.0,
+      "gst_on_mdr": 0.0,
+      "gst_rate": 0.18,
+      "itc_eligible_gst": 0.0,
+      "refund_deducted": 0,
+      "net_payout": 27292.58,
+      "expected_net": 27292.58,
+      "net_variance": 0.0,
+      "waterfall_steps": [
+        {
+          "label": "Gross Amount",
+          "amount": 27292.58,
+          "type": "credit"
+        },
+        {
+          "label": "MDR Fee (upi)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "GST on MDR (18%)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "Net Payout",
+          "amount": 27292.58,
+          "type": "net"
+        }
+      ]
+    },
+    {
+      "payment_id": "pay_42780ecf6b4f18",
+      "order_id": "order_401e3ec731727e",
+      "method": "card",
+      "gross_amount": 8067.0,
+      "mdr_fee": 161.34,
+      "mdr_rate_expected": 0.02,
+      "mdr_rate_actual": 0.02,
+      "gst_on_mdr": 29.04,
+      "gst_rate": 0.18,
+      "itc_eligible_gst": 29.04,
+      "refund_deducted": 0,
+      "net_payout": 7876.62,
+      "expected_net": 7876.62,
+      "net_variance": 0.0,
+      "waterfall_steps": [
+        {
+          "label": "Gross Amount",
+          "amount": 8067.0,
+          "type": "credit"
+        },
+        {
+          "label": "MDR Fee (card)",
+          "amount": -161.34,
+          "type": "debit"
+        },
+        {
+          "label": "GST on MDR (18%)",
+          "amount": -29.04,
+          "type": "debit"
+        },
+        {
+          "label": "Net Payout",
+          "amount": 7876.62,
+          "type": "net"
+        }
+      ]
+    },
+    {
+      "payment_id": "pay_240f20094363e8",
+      "order_id": "order_38657d86917b7a",
+      "method": "upi",
+      "gross_amount": 4728.02,
+      "mdr_fee": 0.0,
+      "mdr_rate_expected": 0.0,
+      "mdr_rate_actual": 0.0,
+      "gst_on_mdr": 0.0,
+      "gst_rate": 0.18,
+      "itc_eligible_gst": 0.0,
+      "refund_deducted": 0,
+      "net_payout": 4728.02,
+      "expected_net": 4728.02,
+      "net_variance": 0.0,
+      "waterfall_steps": [
+        {
+          "label": "Gross Amount",
+          "amount": 4728.02,
+          "type": "credit"
+        },
+        {
+          "label": "MDR Fee (upi)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "GST on MDR (18%)",
+          "amount": -0.0,
+          "type": "debit"
+        },
+        {
+          "label": "Net Payout",
+          "amount": 4728.02,
+          "type": "net"
+        }
+      ]
+    }
+  ],
+  "classifications": [
+    {
+      "payment_id": "pay_99f770d601f1fe",
+      "amount_diff": -1103.33,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "VARIANCE",
+      "category": "CROSS_PERIOD_REFUND",
+      "confidence": 0.85,
+      "explanation": "Recon amount Rs. 1103.33 less than payment. Likely cross-period refund deducted from settlement."
+    },
+    {
+      "payment_id": "pay_94dad04040ecfd",
+      "amount_diff": -0.6,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "VARIANCE",
+      "category": "ROUNDING",
+      "confidence": 0.98,
+      "explanation": "Sub-rupee rounding difference of Rs. -0.6. Within Rs. 1.0 tolerance."
+    },
+    {
+      "payment_id": "pay_30476b91b080a1",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_42780ecf6b4f18",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_240f20094363e8",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_334a164f59a760",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_39bb9f35d83824",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_69002b6773c886",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_836db9b5b9b7d9",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    },
+    {
+      "payment_id": "pay_18df1319ff01ca",
+      "amount_diff": 0.0,
+      "fee_diff": 0.0,
+      "tax_diff": 0.0,
+      "status": "MATCHED",
+      "category": "MATCHED",
+      "confidence": 1.0,
+      "explanation": "All fields match exactly."
+    }
+  ],
+  "forecast": {
+    "summary": "7-day cash flow forecast: Expected net inflow of Rs. 684,481.94. Highest expected on Monday (Rs. 125,166.63). Weekend settlements expected to be 30-45% of weekday volumes.",
+    "predictions": [
+      {
+        "date": "2026-09-05",
+        "day_of_week": "Saturday",
+        "predicted_net": 57309.16,
+        "predicted_gross": 59522.08,
+        "predicted_fees": 2212.92,
+        "confidence": 0.85,
+        "confidence_low": 45847.33,
+        "confidence_high": 68770.99
+      },
+      {
+        "date": "2026-09-06",
+        "day_of_week": "Sunday",
+        "predicted_net": 35776.39,
+        "predicted_gross": 37157.84,
+        "predicted_fees": 1381.45,
+        "confidence": 0.85,
+        "confidence_low": 28621.11,
+        "confidence_high": 42931.67
+      },
+      {
+        "date": "2026-09-07",
+        "day_of_week": "Monday",
+        "predicted_net": 125166.63,
+        "predicted_gross": 129999.77,
+        "predicted_fees": 4833.14,
+        "confidence": 0.85,
+        "confidence_low": 100133.3,
+        "confidence_high": 150199.96
+      },
+      {
+        "date": "2026-09-08",
+        "day_of_week": "Tuesday",
+        "predicted_net": 120959.94,
+        "predicted_gross": 125630.64,
+        "predicted_fees": 4670.7,
+        "confidence": 0.7,
+        "confidence_low": 96767.95,
+        "confidence_high": 145151.93
+      },
+      {
+        "date": "2026-09-09",
+        "day_of_week": "Wednesday",
+        "predicted_net": 121801.46,
+        "predicted_gross": 126504.65,
+        "predicted_fees": 4703.19,
+        "confidence": 0.7,
+        "confidence_low": 97441.17,
+        "confidence_high": 146161.75
+      },
+      {
+        "date": "2026-09-10",
+        "day_of_week": "Thursday",
+        "predicted_net": 111894.42,
+        "predicted_gross": 116215.06,
+        "predicted_fees": 4320.64,
+        "confidence": 0.55,
+        "confidence_low": 89515.54,
+        "confidence_high": 134273.3
+      },
+      {
+        "date": "2026-09-11",
+        "day_of_week": "Friday",
+        "predicted_net": 111573.94,
+        "predicted_gross": 115882.21,
+        "predicted_fees": 4308.27,
+        "confidence": 0.55,
+        "confidence_low": 89259.15,
+        "confidence_high": 133888.73
+      }
+    ],
+    "total_predicted_net": 684481.94,
+    "methodology": "Moving average with day-of-week seasonal adjustment",
+    "data_basis": {
+      "historical_net": 3516984.69,
+      "historical_records": 150,
+      "avg_daily_net": 117232.82
+    }
+  }
+}
