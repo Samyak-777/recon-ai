@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
@@ -6,11 +6,63 @@ import {
   Receipt, 
   CheckCircle2, 
   Sparkles,
-  Info
+  Info,
+  Search,
+  Layers,
+  Filter,
+  Building2,
+  Calendar
 } from 'lucide-react';
 
-export default function GrossNetWaterfall({ waterfalls, financials }) {
+export default function GrossNetWaterfall({ waterfalls, financials, settlements }) {
+  const [selectedBatch, setSelectedBatch] = useState('all');
+  const [selectedMethod, setSelectedMethod] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedTxn, setSelectedTxn] = useState(waterfalls?.[0] || null);
+
+  // Extract unique batches with metadata
+  const batches = useMemo(() => {
+    if (!waterfalls || waterfalls.length === 0) return [];
+    
+    const batchMap = {};
+    waterfalls.forEach(wf => {
+      const sid = wf.settlement_id || 'setl_0000';
+      if (!batchMap[sid]) {
+        batchMap[sid] = {
+          id: sid,
+          count: 0,
+          gross: 0,
+          net: 0,
+          mdr: 0,
+          gst: 0,
+          utr: `UTR_${sid.replace('setl_', '')}_BANK`,
+        };
+      }
+      batchMap[sid].count += 1;
+      batchMap[sid].gross += (wf.gross_amount || 0);
+      batchMap[sid].net += (wf.net_payout || 0);
+      batchMap[sid].mdr += (wf.mdr_fee || 0);
+      batchMap[sid].gst += (wf.gst_on_mdr || 0);
+    });
+
+    return Object.values(batchMap).sort((a, b) => a.id.localeCompare(b.id));
+  }, [waterfalls]);
+
+  // Filtered transactions
+  const filteredWaterfalls = useMemo(() => {
+    if (!waterfalls) return [];
+    return waterfalls.filter(wf => {
+      const matchBatch = selectedBatch === 'all' || (wf.settlement_id || 'setl_0000') === selectedBatch;
+      const matchMethod = selectedMethod === 'all' || wf.method === selectedMethod;
+      const query = searchQuery.trim().toLowerCase();
+      const matchSearch = !query || 
+        wf.payment_id?.toLowerCase().includes(query) ||
+        wf.order_id?.toLowerCase().includes(query) ||
+        wf.settlement_id?.toLowerCase().includes(query);
+
+      return matchBatch && matchMethod && matchSearch;
+    });
+  }, [waterfalls, selectedBatch, selectedMethod, searchQuery]);
 
   if (!waterfalls || waterfalls.length === 0) {
     return (
@@ -20,7 +72,8 @@ export default function GrossNetWaterfall({ waterfalls, financials }) {
     );
   }
 
-  const current = selectedTxn || waterfalls[0];
+  const current = selectedTxn || filteredWaterfalls[0] || waterfalls[0];
+  const activeBatchMeta = batches.find(b => b.id === selectedBatch);
 
   return (
     <div className="space-y-6">
@@ -65,6 +118,112 @@ export default function GrossNetWaterfall({ waterfalls, financials }) {
         </div>
       </div>
 
+      {/* Batch Selector & Filter Toolbar */}
+      <div className="rzp-card rounded-2xl p-4 bg-white border border-slate-200 space-y-3">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1">
+            <span className="text-xs font-bold text-[#0c2340] flex items-center gap-1.5 shrink-0">
+              <Layers className="h-4 w-4 text-[#0c6cf2]" />
+              Settlement Batches:
+            </span>
+            <button
+              onClick={() => setSelectedBatch('all')}
+              className={`px-3 py-1.5 text-xs rounded-xl font-semibold transition-all shrink-0 ${
+                selectedBatch === 'all'
+                  ? 'bg-[#0c6cf2] text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All Batches ({waterfalls.length})
+            </button>
+            {batches.map(b => (
+              <button
+                key={b.id}
+                onClick={() => setSelectedBatch(b.id)}
+                className={`px-3 py-1.5 text-xs rounded-xl font-mono font-semibold transition-all shrink-0 flex items-center gap-1.5 ${
+                  selectedBatch === b.id
+                    ? 'bg-[#0c6cf2] text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <span>{b.id}</span>
+                <span className={`text-[10px] font-sans px-1.5 py-0.2 rounded-full ${
+                  selectedBatch === b.id ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {b.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative w-full md:w-64 shrink-0">
+            <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search Payment or Order ID..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#0c6cf2] text-[#0c2340]"
+            />
+          </div>
+        </div>
+
+        {/* Payment Method Pills */}
+        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 overflow-x-auto">
+          <span className="text-[11px] font-medium text-slate-400 shrink-0">Rail:</span>
+          {['all', 'upi', 'card', 'netbanking', 'wallet', 'intl_card'].map(m => (
+            <button
+              key={m}
+              onClick={() => setSelectedMethod(m)}
+              className={`px-2.5 py-0.5 text-[11px] rounded-lg font-medium transition-colors shrink-0 uppercase ${
+                selectedMethod === m
+                  ? 'bg-slate-800 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {m === 'all' ? 'All Methods' : m}
+            </button>
+          ))}
+          <span className="text-[11px] text-slate-400 ml-auto font-mono shrink-0">
+            Showing {filteredWaterfalls.length} of {waterfalls.length} entries
+          </span>
+        </div>
+      </div>
+
+      {/* If a specific batch is selected, show active batch metadata banner */}
+      {selectedBatch !== 'all' && activeBatchMeta && (
+        <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-[#0c6cf2]" />
+            <div>
+              <span className="text-[11px] font-sans font-bold text-slate-500 uppercase block">Settlement Batch</span>
+              <span className="text-sm font-bold text-[#0c2340]">{activeBatchMeta.id}</span>
+              <span className="text-slate-400 font-sans ml-2 text-[11px]">• UTR: {activeBatchMeta.utr}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="text-[10px] font-sans text-slate-500 block">BATCH GROSS</span>
+              <span className="font-bold text-[#0c2340]">Rs. {activeBatchMeta.gross.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+            </div>
+            <div>
+              <span className="text-[10px] font-sans text-slate-500 block">TOTAL MDR + GST</span>
+              <span className="font-bold text-rose-600">Rs. {(activeBatchMeta.mdr + activeBatchMeta.gst).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+            </div>
+            <div>
+              <span className="text-[10px] font-sans text-slate-500 block">NET TO BANK</span>
+              <span className="font-bold text-[#00b87c]">Rs. {activeBatchMeta.net.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+            </div>
+            <div>
+              <span className="text-[10px] font-sans text-slate-500 block">ENTRIES</span>
+              <span className="font-bold text-[#0c6cf2]">{activeBatchMeta.count} txns</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Transaction Selector List */}
@@ -72,46 +231,57 @@ export default function GrossNetWaterfall({ waterfalls, financials }) {
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <h4 className="text-sm font-bold text-[#0c2340] flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-[#0c6cf2]" />
-              Reconciled Transactions ({waterfalls.length})
+              Transactions ({filteredWaterfalls.length})
             </h4>
             <span className="text-[11px] text-slate-500 font-sans">Click to inspect waterfall</span>
           </div>
 
           <div className="overflow-y-auto space-y-2 pr-1 flex-1">
-            {waterfalls.map((wf, idx) => {
-              const isSelected = current?.payment_id === wf.payment_id;
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedTxn(wf)}
-                  className={`p-3 rounded-xl cursor-pointer transition-all border text-left ${
-                    isSelected
-                      ? 'bg-blue-50/80 border-blue-300 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/80 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#0c2340]">{wf.payment_id}</span>
-                    <span className="text-xs font-bold text-[#00b87c] font-mono">
-                      Rs. {wf.net_payout?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <span className="uppercase px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[10px] font-semibold text-slate-700">
-                        {wf.method}
+            {filteredWaterfalls.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs font-sans">
+                No transactions match current batch or filters.
+              </div>
+            ) : (
+              filteredWaterfalls.map((wf, idx) => {
+                const isSelected = current?.payment_id === wf.payment_id;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedTxn(wf)}
+                    className={`p-3 rounded-xl cursor-pointer transition-all border text-left ${
+                      isSelected
+                        ? 'bg-blue-50/80 border-blue-300 shadow-xs'
+                        : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/80 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-[#0c2340]">{wf.payment_id}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100/70 text-[#0c6cf2] border border-blue-200">
+                          {wf.settlement_id || 'setl_0000'}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-[#00b87c] font-mono">
+                        Rs. {wf.net_payout?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </span>
-                      <span>Gross: Rs. {wf.gross_amount?.toLocaleString('en-IN')}</span>
                     </div>
-                    {wf.refund_deducted > 0 && (
-                      <span className="text-amber-700 text-[10px] font-semibold bg-amber-50 px-1 rounded border border-amber-200">
-                        Refund: Rs. {wf.refund_deducted}
-                      </span>
-                    )}
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <span className="uppercase px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[10px] font-semibold text-slate-700">
+                          {wf.method}
+                        </span>
+                        <span>Gross: Rs. {wf.gross_amount?.toLocaleString('en-IN')}</span>
+                      </div>
+                      {wf.refund_deducted > 0 && (
+                        <span className="text-amber-700 text-[10px] font-semibold bg-amber-50 px-1 rounded border border-amber-200">
+                          Refund: Rs. {wf.refund_deducted}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -120,8 +290,13 @@ export default function GrossNetWaterfall({ waterfalls, financials }) {
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
               <div>
-                <span className="text-[11px] font-mono font-bold text-[#0c6cf2]">ORDER: {current?.order_id || 'N/A'}</span>
-                <h4 className="text-lg font-bold text-[#0c2340] flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono font-bold text-[#0c6cf2]">ORDER: {current?.order_id || 'N/A'}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                    BATCH: {current?.settlement_id || 'setl_0000'}
+                  </span>
+                </div>
+                <h4 className="text-lg font-bold text-[#0c2340] flex items-center gap-2 mt-1">
                   Waterfall for {current?.payment_id}
                 </h4>
               </div>

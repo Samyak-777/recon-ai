@@ -28,7 +28,7 @@
 ## 📖 Table of Contents
 
 - [The Problem](#-the-problem)
-- [How ReconAI Solves It](#-how-reconai-solves-it)
+- [How ReconAI Solves It](#how-reconai-solves-it)
 - [System Architecture](#-system-architecture)
 - [Core Features](#-core-features)
 - [Benchmark Results](#-benchmark-results)

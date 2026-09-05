@@ -88,6 +88,7 @@ def unpack_net_to_gross(payment: Dict, recon: Dict) -> Dict:
     waterfall = {
         "payment_id": payment["payment_id"],
         "order_id": payment.get("order_id"),
+        "settlement_id": payment.get("settlement_id") or recon.get("settlement_id") or "setl_0000",
         "method": method,
         "gross_amount": gross,
         "mdr_fee": actual_fee,
@@ -381,6 +382,7 @@ def run_reconciliation(
             "throughput_records_per_sec": round(total_records / (total_ms / 1000), 1) if total_ms > 0 else 0,
         },
         "waterfalls": waterfalls,
+        "settlements": settlements,
         "classifications": classifications,
         "fuzzy_candidates": fuzzy_candidates,
         "duplicates": match_result["duplicates"],

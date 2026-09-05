@@ -37,7 +37,11 @@ class RazorpayReconMCPClient:
             "Content-Type": "application/json"
         }
 
-        loop = asyncio.get_event_loop()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         def _make_request():
             try:
                 req = urllib.request.Request(url, headers=headers)

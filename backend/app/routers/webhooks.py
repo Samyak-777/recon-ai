@@ -59,9 +59,20 @@ async def receive_razorpay_webhook(
     entity_data = payload.get("payload", {})
 
     db = get_db()
+
+    # Idempotency Guard: Check if event_id was already processed
+    existing_event = await db.webhooks.find_one({"event_id": event_id})
+    if existing_event:
+        return {
+            "status": "DUPLICATE_IGNORED",
+            "message": f"Idempotency guard: Event {event_id} has already been processed",
+            "event_id": event_id,
+            "first_received_at": existing_event.get("received_at")
+        }
+
     ingested_record = None
 
-    # Handle Payment Events
+    # Handle Payment Events (Idempotent Upsert)
     if "payment" in entity_data:
         p_entity = entity_data["payment"]["entity"]
         amount_inr = float(p_entity.get("amount", 0)) / 100.0
@@ -74,9 +85,10 @@ async def receive_razorpay_webhook(
             fee_inr = round(amount_inr * (0.02 if method == "card" else 0.018), 2)
             tax_inr = round(fee_inr * 0.18, 2)
 
+        payment_id = p_entity.get("id")
         payment_doc = {
-            "payment_id": p_entity.get("id"),
-            "order_id": p_entity.get("order_id") or f"order_{p_entity.get('id')}",
+            "payment_id": payment_id,
+            "order_id": p_entity.get("order_id") or f"order_{payment_id}",
             "amount": amount_inr,
             "currency": p_entity.get("currency", "INR"),
             "status": p_entity.get("status", "captured"),
@@ -89,14 +101,15 @@ async def receive_razorpay_webhook(
             "source": "RAZORPAY_WEBHOOK",
             "received_at": datetime.utcnow().isoformat()
         }
-        await db.payments.insert_one(payment_doc)
+        await db.payments.update_one({"payment_id": payment_id}, {"$set": payment_doc}, upsert=True)
         ingested_record = payment_doc
 
-    # Handle Settlement Events
+    # Handle Settlement Events (Idempotent Upsert)
     elif "settlement" in entity_data:
         s_entity = entity_data["settlement"]["entity"]
+        settlement_id = s_entity.get("id")
         settlement_doc = {
-            "settlement_id": s_entity.get("id"),
+            "settlement_id": settlement_id,
             "amount": float(s_entity.get("amount", 0)) / 100.0,
             "fees": float(s_entity.get("fees", 0)) / 100.0,
             "tax": float(s_entity.get("tax", 0)) / 100.0,
@@ -105,8 +118,17 @@ async def receive_razorpay_webhook(
             "source": "RAZORPAY_WEBHOOK",
             "received_at": datetime.utcnow().isoformat()
         }
-        await db.settlements.insert_one(settlement_doc)
+        await db.settlements.update_one({"settlement_id": settlement_id}, {"$set": settlement_doc}, upsert=True)
         ingested_record = settlement_doc
+
+    # Record event in webhooks collection for audit and idempotency tracking
+    await db.webhooks.insert_one({
+        "event_id": event_id,
+        "event_type": event_type,
+        "signature_verified": bool(secret and is_valid),
+        "received_at": datetime.utcnow().isoformat(),
+        "status": "processed"
+    })
 
     # Store in Live Feed Buffer (keep last 50)
     feed_entry = {

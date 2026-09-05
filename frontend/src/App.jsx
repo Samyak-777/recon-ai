@@ -126,6 +126,7 @@ export default function App() {
             <GrossNetWaterfall 
               waterfalls={reconData?.waterfalls} 
               financials={reconData?.financials} 
+              settlements={reconData?.settlements}
             />
             <ExceptionQueue 
               exceptionsData={exceptionsData} 
@@ -138,6 +139,7 @@ export default function App() {
           <GrossNetWaterfall 
             waterfalls={reconData?.waterfalls} 
             financials={reconData?.financials} 
+            settlements={reconData?.settlements}
           />
         )}
 

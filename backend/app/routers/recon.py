@@ -131,46 +131,107 @@ async def run_recon():
     # Run reconciliation
     result = run_reconciliation(orders, payments, settlements, recon_entries)
 
-    # Store result
+    # Store complete result in MongoDB for cross-worker persistence
     _latest_recon_result = result
-    await db.recon_results.insert_one({
-        "run_id": result["run_id"],
-        "timestamp": result["timestamp"],
-        "summary": result["summary"],
-        "financials": result["financials"],
-        "performance": result["performance"],
-    })
+    result_copy = {k: v for k, v in result.items() if k != "_id"}
+    await db.recon_results.insert_one(result_copy)
 
     return result
+
+
+async def _get_or_load_latest_recon() -> dict:
+    """Retrieve latest result from memory cache or load from MongoDB."""
+    global _latest_recon_result
+    if _latest_recon_result:
+        return _latest_recon_result
+
+    db = get_db()
+    stored = await db.recon_results.find_one({}, {"_id": 0}, sort=[("timestamp", -1)])
+    if stored and "waterfalls" in stored:
+        _latest_recon_result = stored
+        return _latest_recon_result
+
+    return await run_recon()
 
 
 @router.get("/results")
 async def get_results():
     """Get the latest reconciliation results."""
-    if not _latest_recon_result:
-        # Run automatically if no result cached yet
-        return await run_recon()
-    return _latest_recon_result
+    return await _get_or_load_latest_recon()
 
 
 @router.get("/summary")
 async def get_summary():
     """Get a lightweight summary of the latest reconciliation."""
-    if not _latest_recon_result:
-        await run_recon()
+    latest = await _get_or_load_latest_recon()
     return {
-        "summary": _latest_recon_result.get("summary"),
-        "financials": _latest_recon_result.get("financials"),
-        "performance": _latest_recon_result.get("performance"),
+        "summary": latest.get("summary"),
+        "financials": latest.get("financials"),
+        "performance": latest.get("performance"),
+    }
+
+
+@router.get("/batches")
+async def get_settlement_batches():
+    """Get all settlement batches with aggregate totals and transaction-level drilldown."""
+    latest = await _get_or_load_latest_recon()
+    settlements = latest.get("settlements", [])
+    waterfalls = latest.get("waterfalls", [])
+
+    batch_map = {}
+    for s in settlements:
+        sid = s["settlement_id"]
+        batch_map[sid] = {
+            **s,
+            "matched_txns": [],
+            "total_gross": 0.0,
+            "total_net": 0.0,
+            "total_mdr": 0.0,
+            "total_gst": 0.0,
+            "total_refunds": 0.0,
+        }
+
+    for w in waterfalls:
+        sid = w.get("settlement_id", "setl_0000")
+        if sid not in batch_map:
+            batch_map[sid] = {
+                "settlement_id": sid,
+                "amount": 0.0,
+                "fees": 0.0,
+                "tax": 0.0,
+                "utr": f"UTR_{sid.upper()}",
+                "status": "processed",
+                "matched_txns": [],
+                "total_gross": 0.0,
+                "total_net": 0.0,
+                "total_mdr": 0.0,
+                "total_gst": 0.0,
+                "total_refunds": 0.0,
+            }
+        b = batch_map[sid]
+        b["matched_txns"].append(w)
+        b["total_gross"] = round(b["total_gross"] + w["gross_amount"], 2)
+        b["total_net"] = round(b["total_net"] + w["net_payout"], 2)
+        b["total_mdr"] = round(b["total_mdr"] + w["mdr_fee"], 2)
+        b["total_gst"] = round(b["total_gst"] + w["gst_on_mdr"], 2)
+        b["total_refunds"] = round(b["total_refunds"] + w["refund_deducted"], 2)
+
+    for sid, b in batch_map.items():
+        b["txn_count"] = len(b["matched_txns"])
+
+    return {
+        "total_batches": len(batch_map),
+        "batches": list(batch_map.values())
     }
 
 
 @router.get("/waterfalls")
-async def get_waterfalls(limit: int = 20, offset: int = 0):
-    """Get gross-to-net waterfalls for matched transactions."""
-    if not _latest_recon_result:
-        await run_recon()
-    waterfalls = _latest_recon_result.get("waterfalls", [])
+async def get_waterfalls(limit: int = 150, offset: int = 0, settlement_id: str = None):
+    """Get gross-to-net waterfalls for matched transactions with optional batch filter."""
+    latest = await _get_or_load_latest_recon()
+    waterfalls = latest.get("waterfalls", [])
+    if settlement_id:
+        waterfalls = [w for w in waterfalls if w.get("settlement_id") == settlement_id]
     return {
         "total": len(waterfalls),
         "waterfalls": waterfalls[offset:offset + limit],
